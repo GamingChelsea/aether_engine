@@ -1,7 +1,8 @@
+use anyhow::Context;
 use std::sync::Arc;
 use wgpu::{
-    Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue, RequestAdapterError,
-    RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages,
+    Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue, RequestAdapterOptions, Surface,
+    SurfaceConfiguration, TextureUsages,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -14,28 +15,30 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub async fn new(window: Arc<Window>) -> Renderer {
+    pub async fn new(window: Arc<Window>) -> anyhow::Result<Renderer> {
         let instance_desc = &InstanceDescriptor::default();
         let instance = Instance::new(instance_desc);
-        let surface = instance.create_surface(window.clone()).unwrap();
+        let surface = instance
+            .create_surface(window.clone())
+            .context("Create Surface from Instance")?;
         let adapter = instance
             .request_adapter(&RequestAdapterOptions {
                 compatible_surface: Some(&surface),
                 ..Default::default()
             })
             .await
-            .unwrap();
+            .context("Requested Adapter from Instance")?;
         let (device, queue) = adapter
             .request_device(&DeviceDescriptor::default())
             .await
-            .unwrap();
+            .context("Requested Device from Instance")?;
         let surface_config = SurfaceConfiguration {
             usage: TextureUsages::RENDER_ATTACHMENT,
             format: surface
                 .get_capabilities(&adapter)
                 .formats
                 .first()
-                .unwrap()
+                .context("Error in TextureFormat")?
                 .clone(),
             width: window.inner_size().width,
             height: window.inner_size().height,
@@ -46,19 +49,22 @@ impl Renderer {
         };
         surface.configure(&device, &surface_config);
 
-        Self {
+        Ok(Self {
             window: window,
             surface: surface,
             device: device,
             queue: queue,
             surface_config: surface_config,
-        }
+        })
     }
 
-    pub fn render(&self) {
+    pub fn render(&self) -> anyhow::Result<()> {
         let surface = &self.surface;
-        let current_texture = surface.get_current_texture().unwrap();
+        let current_texture = surface
+            .get_current_texture()
+            .context("Getting Surface Texture")?;
         current_texture.present();
+        Ok(())
     }
 
     pub fn resize(&mut self, new_size: PhysicalSize<u32>) {

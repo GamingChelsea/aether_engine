@@ -6,4 +6,6 @@ edition = "2021"
 [dependencies]
 engine-renderer = { path = "../../crates/engine-renderer" }
 winit = { workspace = true }
+anyhow = { workspace = true }
+native-dialog = { workspace = true }
 pollster = "0.4"

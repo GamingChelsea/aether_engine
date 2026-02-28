@@ -12,6 +12,8 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
+anyhow = "1.0.102"
 bevy_ecs = "0.18.0"
 wgpu = "28.0.0"
 winit = "0.30.12"
+native-dialog = "0.9.6"
