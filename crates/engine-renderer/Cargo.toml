@@ -7,3 +7,4 @@ edition = "2024"
 wgpu = { workspace = true }
 winit = { workspace = true }
 anyhow = { workspace = true }
+engine-i18n = { path = "../engine-i18n" }

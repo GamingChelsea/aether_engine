@@ -1,4 +1,5 @@
 use anyhow::Context;
+use engine_i18n::t;
 use std::sync::Arc;
 use wgpu::{
     Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue, RequestAdapterOptions, Surface,
@@ -20,25 +21,25 @@ impl Renderer {
         let instance = Instance::new(instance_desc);
         let surface = instance
             .create_surface(window.clone())
-            .context("Create Surface from Instance")?;
+            .context(t!("renderer.create_surface"))?;
         let adapter = instance
             .request_adapter(&RequestAdapterOptions {
                 compatible_surface: Some(&surface),
                 ..Default::default()
             })
             .await
-            .context("Requested Adapter from Instance")?;
+            .context(t!("renderer.request_adapter"))?;
         let (device, queue) = adapter
             .request_device(&DeviceDescriptor::default())
             .await
-            .context("Requested Device from Instance")?;
+            .context(t!("renderer.request_device"))?;
         let surface_config = SurfaceConfiguration {
             usage: TextureUsages::RENDER_ATTACHMENT,
             format: surface
                 .get_capabilities(&adapter)
                 .formats
                 .first()
-                .context("Error in TextureFormat")?
+                .context(t!("renderer.texture_format_error"))?
                 .clone(),
             width: window.inner_size().width,
             height: window.inner_size().height,
@@ -62,7 +63,7 @@ impl Renderer {
         let surface = &self.surface;
         let current_texture = surface
             .get_current_texture()
-            .context("Getting Surface Texture")?;
+            .context(t!("renderer.get_surface_texture"))?;
         current_texture.present();
         Ok(())
     }

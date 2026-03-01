@@ -6,6 +6,7 @@ members = [
     "crates/engine-audio",
     "crates/engine-network",
     "crates/engine-scripting",
+    "crates/engine-i18n",
     "cmd/engine-editor",
     "cmd/game-client",
 ]
@@ -17,3 +18,4 @@ bevy_ecs = "0.18.0"
 wgpu = "28.0.0"
 winit = "0.30.12"
 native-dialog = "0.9.6"
+toml = "0.8"

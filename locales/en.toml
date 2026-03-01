@@ -1,0 +1,24 @@
+test_key = "Hello World"
+
+[renderer]
+create_surface = "Create Surface from Instance"
+request_adapter = "Requested Adapter from Instance"
+request_device = "Requested Device from Instance"
+texture_format_error = "Error in TextureFormat"
+get_surface_texture = "Getting Surface Texture"
+
+[error]
+window_creation = "Window Creation Error"
+renderer_creation = "Render could not be created"
+redraw_request = "Redraw Request Error"
+render = "Render Error"
+resize = "Resize Error"
+unknown = "Unknown Error"
+unknown_location = "Unknown location"
+event_loop_creation = "EventLoop could not be created"
+file = "File"
+line = "Line"
+
+[ui]
+error_title = "Aether Engine — Error"
+window_title = "Aether Engine"

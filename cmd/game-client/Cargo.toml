@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 engine-renderer = { path = "../../crates/engine-renderer" }
+engine-i18n = { path = "../../crates/engine-i18n" }
 winit = { workspace = true }
 anyhow = { workspace = true }
 native-dialog = { workspace = true }

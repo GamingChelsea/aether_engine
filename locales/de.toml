@@ -1,0 +1,24 @@
+test_key = "Hallo Welt"
+
+[renderer]
+create_surface = "Oberfläche konnte nicht erstellt werden"
+request_adapter = "Grafikadapter konnte nicht angefordert werden"
+request_device = "Grafikgerät konnte nicht angefordert werden"
+texture_format_error = "Fehler im Texturformat"
+get_surface_texture = "Oberflächen-Textur konnte nicht abgerufen werden"
+
+[error]
+window_creation = "Fenster konnte nicht erstellt werden"
+renderer_creation = "Renderer konnte nicht erstellt werden"
+redraw_request = "Neuzeichnen-Fehler"
+render = "Render-Fehler"
+resize = "Größenänderungs-Fehler"
+unknown = "Unbekannter Fehler"
+unknown_location = "Unbekannter Ort"
+event_loop_creation = "EventLoop konnte nicht erstellt werden"
+file = "Datei"
+line = "Zeile"
+
+[ui]
+error_title = "Aether Engine — Fehler"
+window_title = "Aether Engine"
