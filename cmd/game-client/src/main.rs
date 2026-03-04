@@ -1,4 +1,5 @@
 use anyhow::Context;
+use engine_core::{AetherCore, TestBundle, Transform, Velocity};
 use engine_i18n::t;
 use engine_renderer::renderer::Renderer;
 use native_dialog::{DialogBuilder, MessageLevel};
@@ -9,6 +10,7 @@ use winit::{
 
 struct App {
     renderer: Option<Renderer>,
+    aether_core: AetherCore,
 }
 
 impl ApplicationHandler for App {
@@ -33,6 +35,7 @@ impl ApplicationHandler for App {
             event_loop.exit();
         };
         if event == WindowEvent::RedrawRequested {
+            self.aether_core.tick();
             self.renderer
                 .as_mut()
                 .expect(&t!("error.redraw_request"))
@@ -63,7 +66,13 @@ fn main() -> anyhow::Result<()> {
         };
 
         let location = match panic_info.location() {
-            Some(loc) => format!("{}: {}, {}: {}", t!("error.file"), loc.file(), t!("error.line"), loc.line()),
+            Some(loc) => format!(
+                "{}: {}, {}: {}",
+                t!("error.file"),
+                loc.file(),
+                t!("error.line"),
+                loc.line()
+            ),
             None => t!("error.unknown_location"),
         };
         DialogBuilder::message()
@@ -75,7 +84,17 @@ fn main() -> anyhow::Result<()> {
             .ok();
     }));
 
-    let mut app: App = App { renderer: None };
+    let mut aether_core = AetherCore::new();
+    let test_b = TestBundle {
+        transform: Transform::default(),
+        velocity: Velocity::default(),
+    };
+    aether_core.world.spawn(test_b);
+
+    let mut app: App = App {
+        renderer: None,
+        aether_core: aether_core,
+    };
     let event_loop = EventLoop::new().context(t!("error.event_loop_creation"))?;
     event_loop.run_app(&mut app).ok();
     Ok(())
