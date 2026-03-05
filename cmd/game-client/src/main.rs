@@ -7,11 +7,13 @@ use glam::Vec3;
 use native_dialog::{DialogBuilder, MessageLevel};
 use std::sync::Arc;
 use winit::{
-    application::ApplicationHandler, event::WindowEvent, event_loop::EventLoop, window::Window,
+    application::ApplicationHandler,
+    event::WindowEvent,
+    event_loop::{ActiveEventLoop, EventLoop},
+    window::Window,
 };
 
 struct App {
-    renderer: Option<Renderer>,
     aether_core: AetherCore,
 }
 
@@ -24,7 +26,8 @@ impl ApplicationHandler for App {
 
         let renderer = pollster::block_on(Renderer::new(Arc::new(window)))
             .expect(&t!("error.renderer_creation"));
-        self.renderer = Some(renderer);
+
+        self.aether_core.world.insert_resource(renderer);
     }
 
     fn window_event(
@@ -33,23 +36,29 @@ impl ApplicationHandler for App {
         _window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
+        // TODO MAYBE MATCH INSTEAD OF EVENT
         if event == WindowEvent::CloseRequested {
             event_loop.exit();
         };
         if event == WindowEvent::RedrawRequested {
             self.aether_core.tick();
-            self.renderer
-                .as_mut()
-                .expect(&t!("error.redraw_request"))
+            self.aether_core
+                .world
+                .resource::<Renderer>()
                 .render()
                 .expect(&t!("error.render"));
-            self.about_to_wait(event_loop);
         }
         if let WindowEvent::Resized(new_size) = event {
-            self.renderer
-                .as_mut()
-                .expect(&t!("error.resize"))
+            self.aether_core
+                .world
+                .resource_mut::<Renderer>()
                 .resize(new_size);
+        }
+    }
+
+    fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
+        if let Some(renderer) = self.aether_core.world.get_resource::<Renderer>() {
+            renderer.window.request_redraw();
         }
     }
 }
@@ -88,6 +97,8 @@ fn main() -> anyhow::Result<()> {
     }));
 
     let mut aether_core = AetherCore::new();
+    aether_core.add_systems(sync_transfroms_system);
+
     let test_b = TestBundle {
         transform: Transform::default(),
         velocity: Velocity::default(),
@@ -95,14 +106,9 @@ fn main() -> anyhow::Result<()> {
     aether_core.world.spawn(test_b);
 
     let mut app: App = App {
-        renderer: None,
         aether_core: aether_core,
     };
     let event_loop = EventLoop::new().context(t!("error.event_loop_creation"))?;
-    let renderer_a = app.renderer.take().expect("Renderer missing");
-
-    app.aether_core.world.insert_resource(renderer_a);
-
     event_loop.run_app(&mut app).ok();
     Ok(())
 }

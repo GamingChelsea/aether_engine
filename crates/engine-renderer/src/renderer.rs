@@ -97,7 +97,6 @@ impl Renderer {
             });
             self.instance_buffer = Some(new_buffer);
         }
-
         if let Some(buffer) = &self.instance_buffer {
             if !data.is_empty() {
                 self.queue
