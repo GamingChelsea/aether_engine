@@ -16,6 +16,7 @@ resize = "Resize Error"
 unknown = "Unknown Error"
 unknown_location = "Unknown location"
 event_loop_creation = "EventLoop could not be created"
+buffer_not_found = "Buffer could not be found"
 file = "File"
 line = "Line"
 

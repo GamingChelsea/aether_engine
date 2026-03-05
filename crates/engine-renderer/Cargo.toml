@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+engine-i18n = { path = "../engine-i18n" }
 wgpu = { workspace = true }
 winit = { workspace = true }
 anyhow = { workspace = true }
-engine-i18n = { path = "../engine-i18n" }
+glam = { workspace = true }
+bytemuck = "1.25.0"

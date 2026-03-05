@@ -1,9 +1,11 @@
-use anyhow::Context;
+use anyhow::{Context, Ok};
+use bytemuck::{Pod, Zeroable, cast_slice};
 use engine_i18n::t;
+use glam::Vec3;
 use std::sync::Arc;
 use wgpu::{
-    Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue, RequestAdapterOptions, Surface,
-    SurfaceConfiguration, TextureUsages,
+    Buffer, BufferUsages, Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue,
+    RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages, wgt::BufferDescriptor,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
@@ -13,6 +15,7 @@ pub struct Renderer {
     pub device: Device,
     pub queue: Queue,
     pub surface_config: SurfaceConfiguration,
+    pub instance_buffer: Option<Buffer>,
 }
 
 impl Renderer {
@@ -56,6 +59,7 @@ impl Renderer {
             device: device,
             queue: queue,
             surface_config: surface_config,
+            instance_buffer: None,
         })
     }
 
@@ -73,4 +77,41 @@ impl Renderer {
         self.surface_config.height = new_size.height;
         self.surface.configure(&self.device, &self.surface_config);
     }
+
+    pub fn update_instances(&mut self, data: &[InstanceData]) {
+        let size = (data.len() * size_of::<InstanceData>()) as u64;
+
+        if self.instance_buffer.is_none()
+            || self
+                .instance_buffer
+                .clone()
+                .expect(&t!("error.buffer_not_found"))
+                .size()
+                < size
+        {
+            let new_buffer = self.device.create_buffer(&BufferDescriptor {
+                label: Some("Created Buffer"),
+                size: size,
+                usage: BufferUsages::all(),
+                mapped_at_creation: true,
+            });
+
+            self.instance_buffer = Some(new_buffer);
+            let cas_slice = cast_slice(data);
+            self.queue.write_buffer(
+                &self
+                    .instance_buffer
+                    .clone()
+                    .expect(&t!("error.buffer_not_found"))
+                    .clone(),
+                0,
+                cas_slice,
+            );
+        }
+    }
+}
+#[repr(C)]
+#[derive(Pod, Zeroable, Copy, Clone)]
+pub struct InstanceData {
+    pub position: Vec3,
 }
