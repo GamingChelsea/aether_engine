@@ -7,8 +7,9 @@ edition = "2021"
 engine-renderer = { path = "../../crates/engine-renderer" }
 engine-i18n = { path = "../../crates/engine-i18n" }
 engine-core = { path = "../../crates/engine-core" }
-
+bevy_ecs = { workspace = true }
 winit = { workspace = true }
 anyhow = { workspace = true }
 native-dialog = { workspace = true }
+glam = { workspace = true }
 pollster = "0.4"

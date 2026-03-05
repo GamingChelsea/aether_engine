@@ -1,7 +1,9 @@
 use anyhow::Context;
+use bevy_ecs::prelude::*;
 use engine_core::{AetherCore, TestBundle, Transform, Velocity};
 use engine_i18n::t;
-use engine_renderer::renderer::Renderer;
+use engine_renderer::renderer::{InstanceData, Renderer};
+use glam::Vec3;
 use native_dialog::{DialogBuilder, MessageLevel};
 use std::sync::Arc;
 use winit::{
@@ -41,6 +43,7 @@ impl ApplicationHandler for App {
                 .expect(&t!("error.redraw_request"))
                 .render()
                 .expect(&t!("error.render"));
+            self.about_to_wait(event_loop);
         }
         if let WindowEvent::Resized(new_size) = event {
             self.renderer
@@ -96,6 +99,24 @@ fn main() -> anyhow::Result<()> {
         aether_core: aether_core,
     };
     let event_loop = EventLoop::new().context(t!("error.event_loop_creation"))?;
+    let renderer_a = app.renderer.take().expect("Renderer missing");
+
+    app.aether_core.world.insert_resource(renderer_a);
+
     event_loop.run_app(&mut app).ok();
     Ok(())
+}
+
+pub fn sync_transfroms_system(query: Query<&Transform>, mut renderer: ResMut<Renderer>) {
+    let mut instaces: Vec<InstanceData> = Vec::new();
+    for a in query {
+        instaces.push(InstanceData {
+            position: Vec3 {
+                x: a.x,
+                y: a.y,
+                z: a.z,
+            },
+        });
+    }
+    renderer.update_instances(&instaces);
 }

@@ -747,6 +747,7 @@ name = "engine-renderer"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bevy_ecs",
  "bytemuck",
  "engine-i18n",
  "glam 0.32.0",
@@ -931,9 +932,11 @@ name = "game-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bevy_ecs",
  "engine-core",
  "engine-i18n",
  "engine-renderer",
+ "glam 0.32.0",
  "native-dialog",
  "pollster",
  "winit",

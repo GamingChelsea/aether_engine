@@ -1,14 +1,16 @@
 use anyhow::{Context, Ok};
-use bytemuck::{Pod, Zeroable, cast_slice};
+use bevy_ecs::resource::Resource;
+use bytemuck::{Pod, Zeroable};
 use engine_i18n::t;
 use glam::Vec3;
 use std::sync::Arc;
 use wgpu::{
-    Buffer, BufferUsages, Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue,
-    RequestAdapterOptions, Surface, SurfaceConfiguration, TextureUsages, wgt::BufferDescriptor,
+    Buffer, Device, DeviceDescriptor, Instance, InstanceDescriptor, Queue, RequestAdapterOptions,
+    Surface, SurfaceConfiguration, TextureUsages,
 };
 use winit::{dpi::PhysicalSize, window::Window};
 
+#[derive(Resource)]
 pub struct Renderer {
     pub window: Arc<Window>,
     pub surface: Surface<'static>,
@@ -79,37 +81,32 @@ impl Renderer {
     }
 
     pub fn update_instances(&mut self, data: &[InstanceData]) {
-        let size = (data.len() * size_of::<InstanceData>()) as u64;
+        let needed_size = (data.len() * std::mem::size_of::<InstanceData>()) as u64;
 
-        if self.instance_buffer.is_none()
-            || self
-                .instance_buffer
-                .clone()
-                .expect(&t!("error.buffer_not_found"))
-                .size()
-                < size
-        {
-            let new_buffer = self.device.create_buffer(&BufferDescriptor {
-                label: Some("Created Buffer"),
-                size: size,
-                usage: BufferUsages::all(),
-                mapped_at_creation: true,
+        let needs_resize = match &self.instance_buffer {
+            None => true,
+            Some(buffer) => buffer.size() < needed_size,
+        };
+
+        if needs_resize && needed_size > 0 {
+            let new_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+                label: Some("Instance Buffer"),
+                size: needed_size,
+                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
             });
-
             self.instance_buffer = Some(new_buffer);
-            let cas_slice = cast_slice(data);
-            self.queue.write_buffer(
-                &self
-                    .instance_buffer
-                    .clone()
-                    .expect(&t!("error.buffer_not_found"))
-                    .clone(),
-                0,
-                cas_slice,
-            );
+        }
+
+        if let Some(buffer) = &self.instance_buffer {
+            if !data.is_empty() {
+                self.queue
+                    .write_buffer(buffer, 0, bytemuck::cast_slice(data));
+            }
         }
     }
 }
+
 #[repr(C)]
 #[derive(Pod, Zeroable, Copy, Clone)]
 pub struct InstanceData {
