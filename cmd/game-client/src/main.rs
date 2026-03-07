@@ -5,9 +5,10 @@ use engine_i18n::t;
 use engine_renderer::renderer::{InstanceData, Renderer};
 use glam::Vec3;
 use native_dialog::{DialogBuilder, MessageLevel};
-use std::sync::Arc;
+use std::{cmp::max, sync::Arc};
 use winit::{
     application::ApplicationHandler,
+    dpi::PhysicalSize,
     event::WindowEvent,
     event_loop::{ActiveEventLoop, EventLoop},
     window::Window,
@@ -52,7 +53,10 @@ impl ApplicationHandler for App {
             self.aether_core
                 .world
                 .resource_mut::<Renderer>()
-                .resize(new_size);
+                .resize(PhysicalSize {
+                    width: max(new_size.width, 1),
+                    height: max(new_size.height, 1),
+                });
         }
     }
 
