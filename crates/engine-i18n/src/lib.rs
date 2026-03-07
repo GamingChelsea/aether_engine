@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::RwLock;
 use toml::Value;
+use anyhow::Context;
 
 static TRANSLATIONS: RwLock<Option<HashMap<String, String>>> = RwLock::new(None);
 
@@ -12,10 +13,12 @@ pub fn get(key: &str) -> String {
     }
 }
 
-pub fn load(path: &str) {
-    let content = std::fs::read_to_string(path).expect("Locale File could not be read");
+pub fn load(path: &str) -> anyhow::Result<()> {
+    let content = std::fs::read_to_string(path)
+        .with_context(|| format!("Locale File '{}' could not be read", path))?;
 
-    let parsed: Value = toml::from_str(&content).expect("Locale File is not a valid TOML");
+    let parsed: Value = toml::from_str(&content)
+        .with_context(|| format!("Locale File '{}' is not a valid TOML", path))?;
 
     let mut translations = HashMap::new();
     if let Some(table) = parsed.as_table() {
@@ -24,6 +27,7 @@ pub fn load(path: &str) {
 
     let mut lock = TRANSLATIONS.write().unwrap();
     *lock = Some(translations);
+    Ok(())
 }
 
 fn flatten_table(

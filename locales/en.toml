@@ -3,8 +3,9 @@ test_key = "Hello World"
 [renderer]
 create_surface = "Create Surface from Instance"
 request_adapter = "Requested Adapter from Instance"
-request_device = "Requested Device from Instance"
-texture_format_error = "Error in TextureFormat"
+request_device = "Failed to request device"
+texture_format_error = "Surface texture format is not supported"
+out_of_memory = "Not enough graphics memory (Out of Memory)"
 get_surface_texture = "Getting Surface Texture"
 
 [error]

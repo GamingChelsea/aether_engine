@@ -37,26 +37,28 @@ impl ApplicationHandler for App {
         _window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
-        // TODO MAYBE MATCH INSTEAD OF EVENT
-        if event == WindowEvent::CloseRequested {
-            event_loop.exit();
-        };
-        if event == WindowEvent::RedrawRequested {
-            self.aether_core.tick();
-            self.aether_core
-                .world
-                .resource::<Renderer>()
-                .render()
-                .expect(&t!("error.render"));
-        }
-        if let WindowEvent::Resized(new_size) = event {
-            self.aether_core
-                .world
-                .resource_mut::<Renderer>()
-                .resize(PhysicalSize {
-                    width: max(new_size.width, 1),
-                    height: max(new_size.height, 1),
-                });
+        match event {
+            WindowEvent::CloseRequested => {
+                event_loop.exit();
+            }
+            WindowEvent::RedrawRequested => {
+                self.aether_core.tick();
+                self.aether_core
+                    .world
+                    .resource_mut::<Renderer>()
+                    .render()
+                    .expect(&t!("error.render"));
+            }
+            WindowEvent::Resized(new_size) => {
+                self.aether_core
+                    .world
+                    .resource_mut::<Renderer>()
+                    .resize(PhysicalSize {
+                        width: max(new_size.width, 1),
+                        height: max(new_size.height, 1),
+                    });
+            }
+            _ => {}
         }
     }
 
@@ -68,8 +70,6 @@ impl ApplicationHandler for App {
 }
 
 fn main() -> anyhow::Result<()> {
-    engine_i18n::load("locales/de.toml");
-
     std::panic::set_hook(Box::new(|panic_info| {
         let message_buf: String;
         let message = if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
@@ -99,6 +99,21 @@ fn main() -> anyhow::Result<()> {
             .show()
             .ok();
     }));
+
+    if let Err(e) = run() {
+        DialogBuilder::message()
+            .set_level(MessageLevel::Error)
+            .set_title(&t!("ui.error_title"))
+            .set_text(format!("{:?}", e))
+            .alert()
+            .show()
+            .ok();
+    }
+    Ok(())
+}
+
+fn run() -> anyhow::Result<()> {
+    engine_i18n::load("locales/de.toml")?;
 
     let mut aether_core = AetherCore::new();
     aether_core.add_systems(sync_transfroms_system);

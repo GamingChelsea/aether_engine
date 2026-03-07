@@ -5,6 +5,7 @@ create_surface = "Oberfläche konnte nicht erstellt werden"
 request_adapter = "Grafikadapter konnte nicht angefordert werden"
 request_device = "Grafikgerät konnte nicht angefordert werden"
 texture_format_error = "Fehler im Texturformat"
+out_of_memory = "Nicht genügend Grafikspeicher (Out of Memory)"
 get_surface_texture = "Oberflächen-Textur konnte nicht abgerufen werden"
 
 [error]
